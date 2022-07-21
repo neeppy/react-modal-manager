@@ -25,8 +25,12 @@ const ModalComponent: React.FC<ModalComponentProps> = function ModalComponent({
     }, []);
 
     return (
-        <ModalVariant isOpen={modalState.isOpen} onHide={onModalClose}>
-            <InnerComponent {...modalState.componentProps} params={modalState.dynamicParams || {}} />
+        <ModalVariant {...modalState.props || {}} isOpen={modalState.isOpen} onHide={onModalClose}>
+            <InnerComponent 
+                {...modalState.componentProps || {}} 
+                params={modalState.dynamicParams || {}}
+                closeModal={onModalClose}
+            />
         </ModalVariant>
     );
 };

@@ -14,7 +14,7 @@ export default function useModal<IComponentProps = {}, IDynamicParams = {}>(
     useComponent: ReactComponent<IComponentProps & { params: IDynamicParams }>,
     configuration: HookProps<IComponentProps> = {},
     deps = [],
-): [(dynamicParams: IDynamicParams) => any, () => any] {
+): (dynamicParams: IDynamicParams) => any {
     const modalKey = useRef(Math.random().toString(36).substring(2, 8));
     const { push, pull, update } = useContext(ModalContext);
 
@@ -37,9 +37,5 @@ export default function useModal<IComponentProps = {}, IDynamicParams = {}>(
         update(modalKey.current, { isOpen: true, dynamicParams });
     }, []);
 
-    const closeModal = useCallback(() => {
-        update(modalKey.current, { isOpen: false, dynamicParams: {} });
-    }, []);
-
-    return [openModal, closeModal];
+    return openModal;
 }
