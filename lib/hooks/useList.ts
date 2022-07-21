@@ -30,7 +30,7 @@ function reducer(currentState: ModalState[], action: Action): ModalState[] {
         case 'pull':
             return currentState.filter(modal => modal.key !== action.payload);
         case 'update':
-            const idx = currentState.findIndex(modalState => modalState.key === action.payload.key);
+            const idx = currentState.findIndex(modalState => modalState.key === action.key);
             const clone = currentState.slice();
 
             clone[idx] = {

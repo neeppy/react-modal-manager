@@ -16,6 +16,8 @@ const ModalProvider: React.FC<ModalProviderProps> = function ModalProvider({ var
 
     const contextValue = useMemo(() => ({ push, pull, update }), []);
 
+    const closeModal = (modalKey: string) => update(modalKey, { isOpen: false, dynamicParams: null });
+
     return (
         <ModalContext.Provider value={contextValue}>
             {children}
@@ -24,12 +26,14 @@ const ModalProvider: React.FC<ModalProviderProps> = function ModalProvider({ var
                     key={modalState.key}
                     modalState={modalState}
                     variant={variants[modalState.variant] || variants.default}
+                    closeModal={closeModal}
                 />
             ) : (
                 <ModalComponent 
                     key={modalState.key}
                     modalState={modalState} 
                     variant={variants} 
+                    closeModal={closeModal}
                 />
             ))}
         </ModalContext.Provider>

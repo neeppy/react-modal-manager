@@ -4,6 +4,7 @@ import type { ModalProps, ModalState, ReactComponent } from "./types";
 type ModalComponentProps = PropsWithChildren<{
     modalState: ModalState,
     variant: ReactComponent<ModalProps>,
+    closeModal: (modalKey: string) => any,
 }>;
 
 const NullComponent = () => null;
@@ -11,18 +12,21 @@ const NullComponent = () => null;
 const ModalComponent: React.FC<ModalComponentProps> = function ModalComponent({ 
     modalState, 
     variant: ModalVariant,
+    closeModal,
 }) {
     const InnerComponent = modalState.useComponent || NullComponent;
 
-    const closeModal = useCallback((params: any) => {
+    const onModalClose = useCallback((params: any) => {
         if (typeof modalState.onHide === 'function') {
             modalState.onHide(params);
         }
+
+        closeModal(modalState.key);
     }, []);
 
     return (
-        <ModalVariant isOpen={modalState.isOpen} onHide={closeModal}>
-            <InnerComponent {...modalState.componentProps} />
+        <ModalVariant isOpen={modalState.isOpen} onHide={onModalClose}>
+            <InnerComponent {...modalState.componentProps} params={modalState.dynamicParams || {}} />
         </ModalVariant>
     );
 };

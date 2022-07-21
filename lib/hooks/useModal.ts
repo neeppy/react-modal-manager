@@ -14,7 +14,7 @@ export default function useModal<IComponentProps = {}, IDynamicParams = {}>(
     useComponent: ReactComponent<IComponentProps & { params: IDynamicParams }>,
     configuration: HookProps<IComponentProps> = {},
     deps = [],
-) {
+): [(dynamicParams: IDynamicParams) => any, () => any] {
     const modalKey = useRef(Math.random().toString(36).substring(2, 8));
     const { push, pull, update } = useContext(ModalContext);
 
