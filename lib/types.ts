@@ -5,11 +5,12 @@ export type ReactComponent<T = {}> = React.FunctionComponent<PropsWithChildren<T
 export type ModalState = {
     key: string,
     variant: string,
-    useComponent: ReactComponent,
+    useComponent: ReactComponent<any>,
     isOpen: boolean,
     onHide?: (params: any) => any,
     props?: any,
     componentProps?: any,
+    dynamicParams?: any,
 }
 
 export type ModalProps = PropsWithChildren<{
