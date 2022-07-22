@@ -1,5 +1,5 @@
 {
-  "name": "react-usemodal",
+  "name": "use-modal-react",
   "version": "1.0.0",
   "description": "Hook for easier handling of modals in react apps.",
   "main": "dist/index.js",
