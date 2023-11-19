@@ -1,24 +1,22 @@
 import { ComponentType } from 'react';
 
-type AnyComponent = ComponentType<any>;
-
 export interface Modal {
     key: string;
-    contentComponent: ComponentType;
-    type: string;
+    variantComponent: ComponentType<any>;
+    contentComponent: ComponentType<any>;
     settings: Object;
-    props: unknown;
+    props: Object;
 }
 
 interface OpenOptions {
-    type?: string;
+    variantComponent: ComponentType<any>;
     settings?: Object;
     props?: Object;
 }
 
 export interface ModalStore {
     registry: Modal[];
-    open: <T extends AnyComponent>(contentComponent: T, options: OpenOptions) => string;
+    open: <T extends ComponentType<any>>(contentComponent: T, options: OpenOptions) => string;
     close: (key: string) => void;
     subscribe: (listener: ListenerFn) => () => void;
 }
@@ -39,7 +37,7 @@ export function createStore(): ModalStore {
             const entry = {
                 key,
                 contentComponent,
-                type: options.type || 'default',
+                variantComponent: options.variantComponent,
                 settings: options.settings || {},
                 props: options.props || {},
             };

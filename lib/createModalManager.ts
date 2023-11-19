@@ -1,25 +1,29 @@
-import { ComponentType } from 'react';
+import { ComponentType, PropsWithChildren } from 'react';
 import { createStore, ModalStore } from './store';
 
 type PropsOf<T> = T extends ComponentType<infer P> ? P : never;
 type Component<T> = ComponentType<T>;
+type HasSettings<T> = T extends { settings: any } ? true : false;
 
 type VariantMap<TVariantProps> = Record<string, ComponentType<TVariantProps>>;
 
 interface VariantComponentProps {
     settings: any;
+    children: PropsWithChildren['children'];
 }
 
 interface ModalManagerConfiguration<TVariantProps extends VariantComponentProps, TVariants extends VariantMap<TVariantProps>> {
-    defaultVariant: keyof TVariants;
+    defaultVariant?: keyof TVariants;
     variants: TVariants;
     defaultSettings?: Partial<{
-        [K in keyof TVariants]: PropsOf<TVariants[K]>['settings'];
+        [K in keyof TVariants]: HasSettings<PropsOf<TVariants[K]>> extends true
+            ? PropsOf<TVariants[K]>['settings']
+            : never;
     }>;
 }
 
 type OpenModalOptions<TContentProps, TVariantProps extends VariantComponentProps, TVariants extends VariantMap<TVariantProps>, TType extends keyof TVariants> = {
-    type: TType;
+    variant?: TType;
     props?: Partial<TContentProps>;
     settings?: Partial<{
         [K in keyof TVariants]: PropsOf<TVariants[K]>['settings'];
@@ -37,26 +41,29 @@ function createModalManager<
         store: ModalStore;
         openModal: <TType extends keyof TVariants, TContentProps>(
             contentComponent: Component<TContentProps>,
-            options: OpenModalOptions<TContentProps, TVariantProps, TVariants, TType>
+            options?: OpenModalOptions<TContentProps, TVariantProps, TVariants, TType>
         ) => CloseFn;
     };
 
     return {
         store: modalStore,
-        openModal<TType extends keyof TVariants, TContentProps>(
-            contentComponent: Component<TContentProps>,
-            options: OpenModalOptions<TContentProps, TVariantProps, TVariants, TType>
-        ): CloseFn {
-            const type = options.type || configuration.defaultVariant;
+        openModal(contentComponent, options) {
+            const type = options?.variant || configuration.defaultVariant || 'default';
+
+            if (!configuration.variants.hasOwnProperty(type)) {
+                const allVariants = Object.keys(configuration.variants).join(', ');
+
+                throw new Error(`Invalid modal variant: "${String(type)}". Defined modal variants are: ${allVariants}.`);
+            }
 
             const key = modalStore.open(contentComponent, {
                 // cast to String, because typescript sees keyof as string | number | symbol
-                type: type as string,
+                variantComponent: configuration.variants[type],
                 settings: {
                     ...configuration.defaultSettings?.[type] || {},
-                    ...options.settings || {},
+                    ...options?.settings || {},
                 },
-                props: options.props,
+                props: options?.props,
             });
 
             return function() {
