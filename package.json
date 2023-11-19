@@ -1,12 +1,13 @@
 {
-  "name": "use-modal-react",
-  "version": "1.0.0",
+  "name": "react-use-modal",
+  "version": "2.0.0",
   "description": "Hook for easier handling of modals in react apps.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -17,13 +18,19 @@
     "modal",
     "hooks"
   ],
-  "author": "developithecus",
+  "author": "neeppy",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=16.8.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.1.2",
+    "@types/jest": "^29.5.8",
     "@types/react": ">=16.8.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   }
 }

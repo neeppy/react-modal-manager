@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, ModalStore } from './store';
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
@@ -15,9 +15,29 @@ function ModalContainer({ store, ...props }: Props) {
     return (
         <div {...props}>
             {visibleModals.map(modal => (
-                <div key={modal.key} />
+                <ModalComponent key={modal.key} modal={modal} store={store} />
             ))}
         </div>
+    );
+}
+
+function ModalComponent({ modal, store }: { modal: Modal, store: ModalStore }) {
+    const {
+        key,
+        variantComponent: VariantComponent,
+        contentComponent: ContentComponent,
+        props,
+        settings
+    } = modal;
+
+    const closeModal = useCallback(() => {
+        store.close(key);
+    }, [store]);
+
+    return (
+        <VariantComponent close={closeModal} settings={settings}>
+            <ContentComponent close={closeModal} {...props} />
+        </VariantComponent>
     );
 }
 
