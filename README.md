@@ -1,166 +1,209 @@
-# React Use Modal
-`react-use-modal` is a hook meant to take care of state management for modals, instead of requiring you to do so. This library does not provide a component for rendering modals, but it allows you to choose what components to use.
+# React Modal Manager
+> Simple, customizable, typesafe state manager for modals.
 
 ## Table of Content
-* [Context](#context---without-react-use-modal)
-* [Basic Usage](#basic-usage---with-react-use-modal)
+* [Basic Usage](#basic-usage)
+* [Variant Components](#variant-components)
+* [Content Components](#content-components)
 * [API](#api)
-    * [`ModalProvider` component](#1-modalprovider-component)
-    * [`useModal` hook](#2-usemodalusecomponent-component-options-hookprops-deps---openmodalfn)
-        * [`useModal` options](#3-additional-options-accepted-by-the-usemodal-hook)
-        * [`OpenModalFn` function](#4-return-openmodalfn-params-idynamicparams--any)
-* [Example Usages](#example-usages)
-    * [Custom Modal Variant & Props](#1-custom-modal-variant--props)
-    * [Dynamic Modal Content](#2-dynamic-content)
-## Context - Without `react-use-modal`
+    * [`createModalManager` function](#createmodalmanager)
+      * [`openModal` function](#openmodal)
+    * [`ModalContainer` component](#modalcontainer)
+* [Examples](#examples)
+  * [1. Custom Variant with custom settings](#1-custom-variant-with-custom-settings)
 
-Consider the following example:
+## Basic Usage
+
+First of all, we need to set up the store which will be used for controlling our modals.
 ```js
-function MyModalComponent(props) {
-    const [isOpen, setIsOpen] = useState(false);
+import { createModalManager, ModalContainer } from 'react-modal-manager';
+import Modal from 'whatever-modal-component';
+import DrawerModal from 'my-drawer-component';
 
-    return (
-        <>
-            <Button onClick={() => setIsOpen(true)}>
-                Open Modal
-            </Button>
-            <Modal isOpen={isOpen} onHide={() => setIsOpen(false)}>
-                <ModalContents/>
-            </Modal>
-        </>
-    );
-}
-```
-
-What's bad about this is that in every component we need a modal, we will have to:
-1. create a state for the modal opening
-2. render the actual modal content alongside the rest of the components tree
-
-## Basic Usage - With `react-use-modal`
-
-First things first, we want to make sure the modal context is available, so add the `ModalProvider` somewhere up the tree (like your `main.js`):
-```js
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+const { store, openModal } = createModalManager({
+    defaultVariant: 'default',
+    variants: {
+        default: Modal, // this is the Modal component itself
+        drawer: DrawerModal,
+    },
+    defaultSettings: {
+        default: { foo: 'bar' },    // passed to the Modal component
+        drawer: { placement: 'right' }, // gets passed to the DrawerModal component
+    },
+});
+
+// ideally you'll want to write this in some other file
+export { openModal };
 
 root.render(
     <React.StrictMode>
-        <ModalProvider variants={Modal}>
-            <App/>
-        </ModalProvider>
+        <App/>
+        <ModalContainer store={store} />
     </React.StrictMode>
 );
 ```
-> The `variants` prop is the component used to actually render the Modal. [Read the API description](#1-modalprovider-component).
 
-The example above could be written as:
+After that, anywhere in the code, you can just run:
 ```js
-function MyModalComponent(props) {
-    const openModal = useModal(ModalContents);
-
-    return (
-        <Button onClick={openModal}>
-            Open Modal
-        </Button>
-    );
-}
+const closeModalFunction = openModal(SomeComponent, {
+    variant: 'drawer',
+    settings: {},   // overrides the defaultSettings – typed as DrawerModal's settings prop
+    props: {},      // passed to SomeComponent – typed as SomeComponent's props
+});
 ```
-> The `useModal` hook is fairly customizable. [Read the API description](#2-usemodalusecomponent-component-options-hookprops-deps---openmodalfn).
+
+## Variant Components
+By variant, we understand the component that renders the Modal itself. It can be a normal modal, 
+or a drawer, or anything you can think of.
+
+This component renders the backdrop, takes care of animations and so on. 
+By using variants, changing from a window to a drawer is trivial and doesn't 
+require any JSX change.
+
+Variants are rendered internally by the `ModalContainer` and receive the `ContentComponent` as children.
+
+Additionally, variant components receive 2 props:
+* `settings` – allows changing variants
+* `close` – allows closing the current modal (useful for close buttons, for example)
+
+Currently, variants can only be changed via the `settings` option. 
+Use the `defaultSettings` in [`createModalManager`](#createmodalmanager) if 
+you want to not repeat yourself.
+
+Whatever information you want to pass inside of a variant can be done by using
+the `settings` prop, as it is typed based on the variant component itself.
+
+## Content Components
+
+Content components are whatever gets rendered inside a modal. It can be a 
+form, it can be a message or it can be a pink unicorn GIF. Use your imagination.
+
+The content component receives:
+* `close` – allows closing the modal
+* `props` - whatever props you pass to the `props` option 
+in [`openModal`](#openmodal). 
+
+The `props` option is typed based on the `ContentComponent` passed to
+the `openModal` function.
 
 ## API
 
-#### 1. `ModalProvider` component
-> The provider of the Modal Context. This library cannot be used without this.
+### createModalManager
 
-| **Property Name** | **Accepted Types** | **Description** |
-| :---------------: | :----------------: | :-------------: |
-| `variants` | `Component \| Object` | All possible variants of modals. |
-
-#### 2. `useModal(useComponent: Component, options?: HookProps, deps = []): OpenModalFn`
-> The actual hook responsible with the magic. It accepts 3 parameters.
-
-| **Parameter Name** | **Accepted Types** | **Description** |
-| :---------------: | :----------------: | --------------: |
-| `useComponent` | `Component` | The component rendered **as modal content**. |
-| `options`<br>_(optional)_ | `HookProps` | Additional options for modal customization (check table below). |
-| `deps`<br>_(optional)_ | `Array` | React dependency array. There aren't really many usecases for using this.<br>_Default value: **[]**_|
-
-#### 3. Additional options accepted by the `useModal` hook:
-
-| **Property Name** | **Accepted Types** | **Description** |
-| :---------------: | :----------------: | --------------: |
-| `variant`<br>_(optional)_ | `string` | The modal variant to be used. Must be one of the specified variants.<br>_Default value: **default**_ |
-| `isDefaultOpen`<br>_(optional)_ | `boolean` | Controls whether the modal should be opened by default or not.<br>_Default value: **false**_ |
-| `onHide`<br>_(optional)_ | `(params: any) => any` | Function called when the modal is closed. Accepts one parameter. |
-| `props`<br>_(optional)_ | `Object` | Properties passed to the Modal variant rendered. |
-| `componentProps`<br>_(optional)_ | `Object` | Properties passed to the component rendered inside the modal. |
-
-#### 4. Return: `OpenModalFn: (params: IDynamicParams) => any`
-> A function that opens the modal when called. It accepts one parameter of type `Object` that will be used as the `params` prop of the modal content component.
-
-## Example Usages
-
-### 1. Custom Modal Variant & Props
-```js
-import Modal from '/my-components/modals/Modal';
-import RedModalVariant from '/my-components/modals/RedModalVariant';
-
-// variants used in ModalProvider
-const variants = {
-    default: Modal,
-    'red-modal': RedModalVariant,
-};
-
-// MyComponent.js
-function MyComponent() {
-    const openModal = useModal(ModalContentComponent, {
-        variant: 'red-modal',
-        props: {    // will be passed to the RedModalVariant component
-            size: 'lg',     
-        },
-        componentProps: {   // will be passed to the ModalContentComponent
-            content: 'hello world',     
-        },
-    });
-
-    return (
-        <button onClick={openModal}>
-            Open Modal
-        </button>
-    );
-}
+```ts
+function createModalManager(
+    configuration: ModalManagerConfiguration
+) : { store: ModalStore, openModal: OpenModalCallback }
 ```
 
-### 2. Dynamic Content
+Return type: `Object`
 
-When you have a list of items, instead of rendering a modal for all of the items (hence, managing multiple component states), you can do something like this:
+| Property | Type | Details                         |
+|----------|------|---------------------------------|
+| `store` | `ModalStore` | Passed to `ModalContainer`      |
+| `openModal` | `OpenModalCallback` | See [API reference](#openModal) |
 
-```js
-// MyComponent.js
-function MyComponent() {
-    const [list, setList] = useState([]);
+Parameter: `Object`
 
-    useEffect(fetchMyList, []);
+| Property          | Type                                 | Details                                                                                                      |
+|-------------------|--------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| `defaultVariant`  | `string` (optional)                  | Used as default variant in case none is passed to `openModal`. (Default: `default`)                          |
+| `variants`        | `Record<string, ComponentType>`      | An object with variant name as key, and React Components as values.                                          |
+| `defaultSettings` | `Record<string, Object>` (optional)  | Default settings used for rendering the Variant components. Typed as Partial of the variant's settings prop. |
 
-    const openModal = useModal(EditListItemModal, {
-        componentProps: {
-            title: 'Edit Item',
-        },
-    });
 
+### ModalContainer
+
+| Prop  | Type         | Details                                  |
+|-------|--------------|------------------------------------------|
+| `store` | `ModalStore` | Store returned from `createModalManager` |
+
+Additionally, this component renders a `div` and receives any component a normal React `div` can receive.
+
+
+### openModal
+
+```ts
+function openModal(
+    contentComponent: ComponentType, 
+    options: OpenModalOptions
+): CloseFunction {}
+```
+
+Return type: `() => void` – function that closes the modal.
+
+Parameters:
+* `contentComponent` – `React.ComponentType`
+* `options` – `OpenModalOptions`, accepts the following properties
+
+| Property   | Type                | Details                                                                                                                  |
+|------------|---------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `variant`  | `string` (optional) | One of the variants defined in `createModalManager`. If none is passed, the `defaultVariant` will be used.               |
+| `settings` | `Object` (optional) | Settings that are passed to the variant's component. These override the default settings passed to `createModalManager`. |
+| `props`    | `Object` (optional) | Partial of the props taken by the `contentComponent` used.                                                               |
+
+
+## Examples
+
+### 1. Custom variant with custom settings
+
+```tsx
+// MyVariant.tsx
+interface DrawerProps {
+    settings: {
+        placement: 'top' | 'bottom' | 'right' | 'left';
+    };
+}
+
+function DrawerComponent({ children, settings }: PropsWithChildren<DrawerProps>) {
     return (
-        <ul>
-            {list.map(item => (
-                <li key={item.id} onClick={() => openModal(item)} />
-            ))}
-        </ul>
+        <div className="container">
+            <div className="backdrop"/>
+            <div className="modal-content">
+                {children}
+            </div>
+        </div>
     );
 }
 
-// EditListItemModal.js
-function EditListItemModal({ title, params: item }) {
-    // the dynamic params prop will be the item passed when openModal got called
-    // title, however, is a static prop passed when the modal is initialized
-}
-```
 
-This way, you can use the same modal instance, while only changing the data used to render the content.
+// modals.tsx
+const { store, openModal } = createModalManager({
+    defaultVariant: 'drawer',
+    variants: {
+        drawer: DrawerComponent,
+    },
+    defaultSettings: {
+        drawer: { placement: 'left' },
+    },
+});
+
+export { store, openModal };
+
+
+// Component.tsx
+import { openModal } from 'modals.tsx';
+
+const ModalContent = ({ close, name }: { name: string, close: () => void }) => (
+    <div>
+        Are you sure you want to log out, {name}?
+        <button>Yes</button>
+        <button onClick={close}>No</button>
+    </div>
+);
+
+const SomeButton = () => (
+    <button onClick={() => {
+        openModal(ModalContent, {
+            // will open on the right, instead of left
+            settings: { placement: 'right' },
+            // will pass the name to the ModalContent
+            props: { name: 'User' },
+        });
+    }}>
+        Open Modal
+    </button>
+);
+```
