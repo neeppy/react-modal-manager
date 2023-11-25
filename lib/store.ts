@@ -6,10 +6,12 @@ export interface Modal {
     contentComponent: ComponentType<any>;
     settings: Object;
     props: Object;
+    $$resolveFn?: (confirm: boolean, data: any) => void;
 }
 
 interface OpenOptions {
     variantComponent: ComponentType<any>;
+    $$resolveModal?: (confirm: boolean, data: any) => void;
     settings?: Object;
     props?: Object;
 }
@@ -38,6 +40,7 @@ export function createStore(): ModalStore {
                 key,
                 contentComponent,
                 variantComponent: options.variantComponent,
+                $$resolveFn: options.$$resolveModal,
                 settings: options.settings || {},
                 props: options.props || {},
             };

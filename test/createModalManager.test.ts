@@ -6,7 +6,7 @@ const ContentComponent = () => null;
 
 describe('modal manager', () => {
     it('uses the correct variant', () => {
-        const { store, openModal } = createModalManager({
+        const { store, modal } = createModalManager({
             defaultVariant: 'default',
             variants: {
                 default: DefaultVariant,
@@ -14,7 +14,7 @@ describe('modal manager', () => {
             },
         });
 
-        openModal(ContentComponent, {
+        modal(ContentComponent, {
             variant: 'alternate',
             settings: { placement: 'top' },
         });
@@ -29,7 +29,7 @@ describe('modal manager', () => {
     });
 
     it('defaults to the defaultVariant when not specified', () => {
-        const { store, openModal } = createModalManager({
+        const { store, modal } = createModalManager({
             defaultVariant: 'default',
             variants: {
                 default: DefaultVariant,
@@ -37,7 +37,7 @@ describe('modal manager', () => {
             },
         });
 
-        openModal(ContentComponent);
+        modal(ContentComponent);
 
         expect(store.registry.at(0)).toMatchObject({
             variantComponent: DefaultVariant,
@@ -45,11 +45,11 @@ describe('modal manager', () => {
     });
 
     it('defaults to "default" variant, when no defaultVariant is specified', () => {
-        const { store, openModal } = createModalManager({
+        const { store, modal } = createModalManager({
             variants: { default: DefaultVariant },
         });
 
-        openModal(ContentComponent);
+        modal(ContentComponent);
 
         expect(store.registry.at(0)).toMatchObject({
             variantComponent: DefaultVariant,
@@ -57,12 +57,12 @@ describe('modal manager', () => {
     });
 
     it('adds modal to the registry when opening', () => {
-        const { store, openModal } = createModalManager({
+        const { store, modal } = createModalManager({
             defaultVariant: 'default',
             variants: { default: DefaultVariant },
         });
 
-        openModal(ContentComponent, { variant: 'default' });
+        modal(ContentComponent, { variant: 'default' });
 
         expect(store.registry.at(0)).toEqual({
             key: expect.any(String),
@@ -74,12 +74,12 @@ describe('modal manager', () => {
     });
 
     it('removes modal from registry when closing', () => {
-        const { store, openModal } = createModalManager({
+        const { store, modal } = createModalManager({
             defaultVariant: 'default',
             variants: { default: DefaultVariant },
         });
 
-        const closeModal = openModal(ContentComponent, { variant: 'default' });
+        const closeModal = modal(ContentComponent, { variant: 'default' });
 
         expect(store.registry.length).toBe(1);
 

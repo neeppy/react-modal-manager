@@ -27,16 +27,24 @@ function ModalComponent({ modal, store }: { modal: Modal, store: ModalStore }) {
         variantComponent: VariantComponent,
         contentComponent: ContentComponent,
         props,
-        settings
+        $$resolveFn,
+        settings,
     } = modal;
 
-    const closeModal = useCallback(() => {
+    const closeModal = useCallback((isConfirm = false, data = null) => {
         store.close(key);
+
+        if (typeof $$resolveFn === 'function') {
+            $$resolveFn(isConfirm, data);
+        }
     }, [store]);
 
     return (
         <VariantComponent close={closeModal} settings={settings}>
-            <ContentComponent close={closeModal} {...props} />
+            <ContentComponent
+                close={closeModal}
+                {...props}
+            />
         </VariantComponent>
     );
 }
