@@ -3,56 +3,50 @@ import { createStore, ModalStore } from './store';
 
 type PropsOf<T> = T extends ComponentType<infer P> ? P : never;
 type Component<T> = ComponentType<T>;
-type HasSettings<T> = T extends { settings: object } ? true : false;
 
 type VariantMap<TVariantProps> = Record<string, ComponentType<TVariantProps>>;
 
-interface VariantComponentProps {
-  settings: object;
-  children: PropsWithChildren['children'];
-}
+type VariantComponentProps<T> = PropsWithChildren & T;
 
 interface ModalManagerConfiguration<
-  TVariantProps extends VariantComponentProps,
+  TVariantProps extends VariantComponentProps<any>,
   TVariants extends VariantMap<TVariantProps>,
 > {
   defaultVariant?: keyof TVariants;
   variants: TVariants;
   defaultSettings?: Partial<{
-    [K in keyof TVariants]: HasSettings<PropsOf<TVariants[K]>> extends true
-      ? PropsOf<TVariants[K]>['settings']
-      : never;
+    [K in keyof TVariants]: Omit<PropsOf<TVariants[K]>, 'children' | 'close'>;
   }>;
 }
 
 type OpenModalOptions<
   TContentProps,
-  TVariantProps extends VariantComponentProps,
+  TVariantProps extends VariantComponentProps<any>,
   TVariants extends VariantMap<TVariantProps>,
   TType extends keyof TVariants,
 > = {
   variant?: TType;
   props?: Partial<TContentProps>;
   settings?: Partial<{
-    [K in keyof TVariants]: PropsOf<TVariants[K]>['settings'];
+    [K in keyof TVariants]: PropsOf<TVariants[K]>;
   }>[TType];
 };
 
 type OpenPromptOptions<
   TContentProps,
-  TVariantProps extends VariantComponentProps,
+  TVariantProps extends VariantComponentProps<any>,
   TVariants extends VariantMap<TVariantProps>,
   TType extends keyof TVariants,
 > = {
   variant?: TType;
   props?: Partial<TContentProps>;
   settings?: Partial<{
-    [K in keyof TVariants]: PropsOf<TVariants[K]>['settings'];
+    [K in keyof TVariants]: PropsOf<TVariants[K]>;
   }>[TType];
 };
 
 function createModalManager<
-  TVariantProps extends VariantComponentProps = VariantComponentProps,
+  TVariantProps extends VariantComponentProps<any> = VariantComponentProps<any>,
   TVariants extends Record<string, Component<TVariantProps>> = Record<
     string,
     Component<TVariantProps>
@@ -89,7 +83,7 @@ function createModalManager<
 
   return {
     store: modalStore,
-    modal(contentComponent, options) {
+    modal(contentComponent, options = undefined) {
       const type =
         options?.variant || configuration.defaultVariant || 'default';
 
@@ -114,7 +108,7 @@ function createModalManager<
         modalStore.close(key);
       };
     },
-    prompt(contentComponent, options) {
+    prompt(contentComponent, options = undefined) {
       return new Promise((resolve) => {
         const type =
           options?.variant || configuration.defaultVariant || 'default';
@@ -142,7 +136,7 @@ function createModalManager<
         });
       });
     },
-  } as CreateModalManagerResult;
+  } satisfies CreateModalManagerResult;
 }
 
 export default createModalManager;

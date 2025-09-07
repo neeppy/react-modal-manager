@@ -43,7 +43,7 @@ function ModalComponent({ modal, store }: { modal: Modal; store: ModalStore }) {
   );
 
   return (
-    <VariantComponent close={closeModal} settings={settings}>
+    <VariantComponent close={closeModal} {...settings}>
       <ContentComponent close={closeModal} {...props} />
     </VariantComponent>
   );

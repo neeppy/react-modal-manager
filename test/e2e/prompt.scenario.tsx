@@ -1,12 +1,22 @@
 import React, { PropsWithChildren, useState } from 'react';
 import createModalManager from '../../lib/createModalManager';
 
-const DefaultVariant = ({ children }: PropsWithChildren) => (
-  <div data-testid="defaultVariant">{children}</div>
+const DefaultVariant = ({
+  children,
+  setting,
+}: PropsWithChildren<{ setting: string }>) => (
+  <div data-testid="defaultVariant" data-setting={setting}>
+    {children}
+  </div>
 );
 
 const { store, prompt } = createModalManager({
   variants: { default: DefaultVariant },
+  defaultSettings: {
+    default: {
+      setting: 'test',
+    },
+  },
 });
 
 const PaymentModal = ({ close }: any) => {

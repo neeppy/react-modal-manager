@@ -7,6 +7,7 @@ import {
   render,
   screen,
 } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 import ModalContainer from '../lib/ModalContainer';
 import createModalManager from '../lib/createModalManager';
 
@@ -24,9 +25,9 @@ const DefaultVariant = ({ children }: PropsWithChildren) => (
 
 const AlternateVariant = ({
   children,
-  settings,
-}: PropsWithChildren<{ settings: { placement: 'top' | 'bottom' } }>) => (
-  <div data-testid={`altVariant-${settings.placement}`}>{children}</div>
+  placement,
+}: PropsWithChildren<{ placement: 'top' | 'bottom' }>) => (
+  <div data-testid={`altVariant-${placement}`}>{children}</div>
 );
 
 const ContentComponent = ({
