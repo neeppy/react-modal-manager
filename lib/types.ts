@@ -1,3 +1,3 @@
 export interface ModalContentProps {
-    close: (isConfirm?: boolean, data?: any) => void;
+  close: (isConfirm?: boolean, data?: any) => void;
 }

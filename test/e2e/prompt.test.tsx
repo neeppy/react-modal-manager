@@ -1,52 +1,62 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import ModalContainer from '../../lib/ModalContainer';
 import { store, ReactApp } from './prompt.scenario';
 
-const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time));
+const delay = (time: number) =>
+  new Promise((resolve) => setTimeout(resolve, time));
 
 describe('prompt E2E flow', () => {
-    const successCallback = jest.fn();
-    const cancelCallback = jest.fn();
+  const successCallback = vi.fn();
+  const cancelCallback = vi.fn();
 
-    beforeEach(() => {
-        render(
-            <>
-                <ReactApp onSuccess={successCallback} onCancel={cancelCallback} />
-                <ModalContainer data-testid="modal-container" store={store} />
-            </>
-        );
+  beforeEach(() => {
+    render(
+      <>
+        <ReactApp onSuccess={successCallback} onCancel={cancelCallback} />
+        <ModalContainer data-testid="modal-container" store={store} />
+      </>,
+    );
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+
+    cleanup();
+  });
+
+  it('calls success callback with appropriate data when resolved', async () => {
+    fireEvent.click(screen.getByTestId('payButton'));
+    fireEvent.change(screen.getByTestId('amountField'), {
+      target: { valueAsNumber: 4000 },
     });
 
-    afterEach(jest.clearAllMocks);
+    expect(successCallback).not.toHaveBeenCalled();
+    expect(cancelCallback).not.toHaveBeenCalled();
 
-    it('calls success callback with appropriate data when resolved', async () => {
-        fireEvent.click(screen.getByTestId('payButton'));
-        fireEvent.change(screen.getByTestId('amountField'), { target: { valueAsNumber: 4000 } });
+    fireEvent.click(screen.getByTestId('submitBtn'));
 
-        expect(successCallback).not.toHaveBeenCalled();
-        expect(cancelCallback).not.toHaveBeenCalled();
+    await delay(200);
 
-        fireEvent.click(screen.getByTestId('submitBtn'));
+    expect(successCallback).toHaveBeenCalledWith(4000);
+    expect(cancelCallback).not.toHaveBeenCalled();
+  });
 
-        await delay(200);
-
-        expect(successCallback).toHaveBeenCalledWith(4000);
-        expect(cancelCallback).not.toHaveBeenCalled();
+  it('calls cancel callback when the modal is closed without resolving', async () => {
+    fireEvent.click(screen.getByTestId('payButton'));
+    fireEvent.change(screen.getByTestId('amountField'), {
+      target: { valueAsNumber: 4000 },
     });
 
-    it('calls cancel callback when the modal is closed without resolving', async () => {
-        fireEvent.click(screen.getByTestId('payButton'));
-        fireEvent.change(screen.getByTestId('amountField'), { target: { valueAsNumber: 4000 } });
+    expect(successCallback).not.toHaveBeenCalled();
+    expect(cancelCallback).not.toHaveBeenCalled();
 
-        expect(successCallback).not.toHaveBeenCalled();
-        expect(cancelCallback).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('closeBtn'));
 
-        fireEvent.click(screen.getByTestId('closeBtn'));
+    await delay(200);
 
-        await delay(200);
-
-        expect(successCallback).not.toHaveBeenCalled();
-        expect(cancelCallback).toHaveBeenCalled();
-    });
+    expect(successCallback).not.toHaveBeenCalled();
+    expect(cancelCallback).toHaveBeenCalled();
+  });
 });
