@@ -2,6 +2,7 @@
   "name": "@neeppy/modal-manager",
   "version": "3.0.0",
   "description": "Simple, customizable state manager for modals.",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
