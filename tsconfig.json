@@ -4,7 +4,7 @@
     "target": "es2015",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": ["ES2017", "ES7", "ES6", "DOM"],
+    "lib": ["ES2022", "ES2017", "ES7", "ES6", "DOM"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -12,9 +12,5 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "exclude": [
-    "./test/*",
-    "./dist/**/*",
-    "node_modules"
-  ]
+  "exclude": ["./test/*", "./dist/**/*", "node_modules"]
 }
