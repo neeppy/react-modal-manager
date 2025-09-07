@@ -4,7 +4,9 @@
   "description": "Simple, customizable state manager for modals.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build": "tsc",
     "prepack": "tsc",
@@ -12,13 +14,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/neeppy/react-modal-manager"
+    "url": "git+https://github.com/neeppy/react-modal-manager.git"
   },
   "keywords": [
     "react",
     "modal",
     "hooks"
   ],
+  "engines": {
+    "node": ">=16"
+  },
   "author": "neeppy",
   "license": "MIT",
   "peerDependencies": {
