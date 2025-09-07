@@ -69,19 +69,17 @@ This component renders the backdrop, takes care of animations and so on.
 By using variants, changing from a window to a drawer is trivial and doesn't
 require any JSX change.
 
-Variants are rendered internally by the `ModalContainer` and receive the `ContentComponent` as children.
+Variants are rendered internally by the `ModalContainer` and receive the `ContentComponent` as children and are provided the following props:
 
-Additionally, variant components receive 2 props:
-
-- `settings` – allows changing variants
 - `close` – allows closing the current modal (useful for close buttons, for example)
+- everything defined under `defaultSettings` or `settings`
 
 Currently, variants can only be changed via the `settings` option.
 Use the `defaultSettings` in [`createModalManager`](#createmodalmanager) if
 you want to not repeat yourself.
 
 Whatever information you want to pass inside of a variant can be done by using
-the `settings` prop, as it is typed based on the variant component itself.
+the `settings` property, as it is typed based on the variant component itself.
 
 ## Content Components
 
